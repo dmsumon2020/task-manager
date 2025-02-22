@@ -7,6 +7,7 @@ const TaskItem = ({ task }) => {
   const { updateMutation, deleteMutation } = useTasks();
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(task.title);
+  const [description, setDescription] = useState(task.description);
 
   // DND-Kit Sorting Hook
   const { attributes, listeners, setNodeRef, transform, transition } =
@@ -26,7 +27,7 @@ const TaskItem = ({ task }) => {
 
     updateMutation.mutate({
       id: task._id,
-      task: { ...task, title },
+      task: { ...task, title, description },
     });
 
     setIsEditing(false);
@@ -57,10 +58,16 @@ const TaskItem = ({ task }) => {
               onChange={(e) => setTitle(e.target.value)}
               className="border p-1 w-full mb-1"
             />
+            <textarea
+              value={description ?? ""}
+              onChange={(e) => setDescription(e.target.value)}
+              className="border p-1 w-full"
+            ></textarea>
           </>
         ) : (
           <>
             <h3 className="font-bold">{task.title}</h3>
+            {task.description && <p className="text-sm">{task.description}</p>}
           </>
         )}
       </div>

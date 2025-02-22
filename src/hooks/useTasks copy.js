@@ -1,60 +1,61 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000/api/tasks"; // Make sure this is correct
+//const API_URL = "http://localhost:5000/api/tasks";
+const API_URL = "http://localhost:5000/tasks";
 
 export const useTasks = () => {
   const queryClient = useQueryClient();
 
-  // Fetch tasks from the server
+  // Fetch tasks
   const {
-    data: tasks = [],
+    data: tasks,
+    error,
     isLoading,
-    isError,
   } = useQuery({
     queryKey: ["tasks"],
     queryFn: async () => {
-      const res = await axios.get(API_URL);
-      return res.data;
+      const response = await axios.get(API_URL);
+      return response.data;
     },
   });
 
-  // Add new task
+  // Add Task Mutation
   const addMutation = useMutation({
     mutationFn: async (newTask) => {
-      const res = await axios.post(API_URL, newTask);
-      return res.data;
+      const response = await axios.post(API_URL, newTask);
+      return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["tasks"]); // Refresh task list
+      queryClient.invalidateQueries(["tasks"]);
     },
   });
 
-  // Edit existing task
+  // Update Task Mutation
   const updateMutation = useMutation({
     mutationFn: async ({ id, task }) => {
-      const res = await axios.put(`${API_URL}/${id}`, task);
-      return res.data;
+      const response = await axios.put(`${API_URL}/${id}`, task);
+      return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["tasks"]); // Refresh task list
+      queryClient.invalidateQueries(["tasks"]);
     },
   });
 
-  // Delete task
+  // Delete Task Mutation
   const deleteMutation = useMutation({
     mutationFn: async (id) => {
       await axios.delete(`${API_URL}/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(["tasks"]); // Refresh task list
+      queryClient.invalidateQueries(["tasks"]);
     },
   });
 
   return {
     tasks,
+    error,
     isLoading,
-    isError,
     addMutation,
     updateMutation,
     deleteMutation,

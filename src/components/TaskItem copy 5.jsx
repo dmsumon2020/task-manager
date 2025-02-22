@@ -7,14 +7,12 @@ const TaskItem = ({ task }) => {
   const { updateMutation, deleteMutation } = useTasks();
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(task.title);
+  const [description, setDescription] = useState(task.description);
 
   // DND-Kit Sorting Hook
   const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({
-      id: task._id,
-    });
+    useSortable({ id: task._id });
 
-  // Apply DND styles
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -26,7 +24,7 @@ const TaskItem = ({ task }) => {
 
     updateMutation.mutate({
       id: task._id,
-      task: { ...task, title },
+      task: { ...task, title, description },
     });
 
     setIsEditing(false);
@@ -42,13 +40,12 @@ const TaskItem = ({ task }) => {
   return (
     <div
       ref={setNodeRef}
+      {...attributes}
+      {...listeners}
       style={style}
       className="bg-gray-100 p-3 rounded shadow-sm flex justify-between items-center cursor-grab"
-      {...attributes}
     >
-      <div className="flex-1" {...listeners}>
-        {" "}
-        {/* Dragging only works on this section */}
+      <div className="flex-1">
         {isEditing ? (
           <>
             <input
@@ -57,10 +54,16 @@ const TaskItem = ({ task }) => {
               onChange={(e) => setTitle(e.target.value)}
               className="border p-1 w-full mb-1"
             />
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="border p-1 w-full"
+            ></textarea>
           </>
         ) : (
           <>
             <h3 className="font-bold">{task.title}</h3>
+            {task.description && <p className="text-sm">{task.description}</p>}
           </>
         )}
       </div>
@@ -75,20 +78,14 @@ const TaskItem = ({ task }) => {
         ) : (
           <button
             className="bg-yellow-500 text-white px-2 py-1 rounded"
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent drag interference
-              setIsEditing(true);
-            }}
+            onClick={() => setIsEditing(true)}
           >
             Edit
           </button>
         )}
         <button
           className="bg-red-500 text-white px-2 py-1 rounded"
-          onClick={(e) => {
-            e.stopPropagation(); // Prevent drag interference
-            handleDelete();
-          }}
+          onClick={handleDelete}
         >
           Delete
         </button>
